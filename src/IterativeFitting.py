@@ -3,6 +3,7 @@ import numpy as np
 import cvxpy as cp
 
 class IterativeFitting:
+    # TODO: Change class name to GLMethods
     def __init__(self, L, A0, N, M1):
         self.N = N
         self.M1 = M1
