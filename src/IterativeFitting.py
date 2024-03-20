@@ -127,7 +127,7 @@ class IterativeFitting:
         self.b0_GLL = b0
         return A, a0, B, b0, i
 
-    def GL(self):
+    def GL(self,OR=True):
         """Standard GL method.
         """
         N = self.N.copy()
@@ -140,10 +140,16 @@ class IterativeFitting:
             A1 = A
             Aplus = A.sum()
             a0 = M1 - Aplus
-            b0 = N[0] - a0
-            B = N[1:] - A
-            c0 = 1/a0 + 1/b0
-            c = 1/A + 1/B
+            if OR:
+                b0 = N[0] - a0
+                B = N[1:] - A
+                c0 = 1/a0 + 1/b0
+                c = 1/A + 1/B
+            else:
+                b0 = N[0]
+                B = N[1:]
+                c0 = 1/a0
+                c = 1/A
 
             # Gradient step in Newton's Method and get ∆A
             e = L + np.log(a0) + np.log(B) - np.log(A) - np.log(b0)
