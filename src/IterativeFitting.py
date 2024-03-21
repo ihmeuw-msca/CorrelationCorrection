@@ -155,6 +155,7 @@ class IterativeFitting:
             e = L + np.log(a0) + np.log(B) - np.log(A) - np.log(b0)
             H = np.ones((self.n,self.n))*c0
             H += np.diag(c)
+            print(H, e)
             A += scipy.linalg.solve(H,e,assume_a="pos")
             i += 1
             diff = np.linalg.norm(A1 - A)
