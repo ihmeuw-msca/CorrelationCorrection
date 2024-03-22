@@ -1,7 +1,7 @@
 import scipy
 import numpy as np
 
-def ham_vanilla(b0,B,M1,Lx,v,a0):
+def ham_vanilla(b0,B,M1,Lx,v,a0,OR=True):
 
     # Construct true p and z values
     B0sum = np.sum(B) + b0
@@ -14,10 +14,15 @@ def ham_vanilla(b0,B,M1,Lx,v,a0):
         a0x = C_Val[0]
         b0x = C_Val[1]
 
-        Vextra = v - 1/a0x - 1/b0x
-        Est_A = (1 + (a0x/b0x)*np.exp(Lx))/(Vextra)
-        Est_B = (1 + b0x/(a0x*np.exp(Lx)))/(Vextra)
-        
+        if OR:
+            Vextra = v - 1/a0x - 1/b0x
+            Est_A = (1 + (a0x/b0x)*np.exp(Lx))/(Vextra)
+            Est_B = (1 + b0x/(a0x*np.exp(Lx)))/(Vextra)
+        else:
+            Vextra = v - 1/a0x + 1/b0x
+            Est_A = (1 - np.exp(Lx)*a0x/b0x)/(Vextra)
+            Est_B = (b0x/(np.exp(Lx)*a0x) - 1)/(Vextra)
+
         SumA = a0x + np.sum(Est_A)
         SumB = b0x + np.sum(Est_B)
 
@@ -33,16 +38,23 @@ def ham_vanilla(b0,B,M1,Lx,v,a0):
 
     # Get estimates for A and B
     a0_fit, b0_fit = a0_b0_res.x[0], a0_b0_res.x[1]
-    denom = v - 1/a0_fit - 1/b0_fit
-    A_num = 1 + (a0_fit/b0_fit)*np.exp(Lx)
-    B_num = 1 + (b0_fit/(a0_fit*np.exp(Lx)))
-    A_fit = A_num / denom
-    B_fit = B_num / denom
+    if OR:
+        denom = v - 1/a0_fit - 1/b0_fit
+        A_num = 1 + (a0_fit/b0_fit)*np.exp(Lx)
+        B_num = 1 + (b0_fit/(a0_fit*np.exp(Lx)))
+        A_fit = A_num / denom
+        B_fit = B_num / denom
+    else:
+        denom = v - 1/a0_fit + 1/b0_fit
+        A_num = (1 - np.exp(Lx)*a0_fit/b0_fit)
+        B_num = (b0_fit/(np.exp(Lx)*a0_fit) - 1)
+        A_fit = A_num / denom
+        B_fit = B_num / denom
 
     # Return a0, b0 in that order
     return A_fit, B_fit, a0_fit, b0_fit
 
-def ham_solved(b0,B,M1,Lx,v,a0):
+def ham_solved(b0,B,M1,Lx,v,a0,OR=True):
 
     # Construct true p and z values
     B0sum = np.sum(B) + b0
@@ -58,22 +70,33 @@ def ham_solved(b0,B,M1,Lx,v,a0):
         A_plus = (1/(z*p))*b0x - a0x
         
         # Ensure denominators are always positive
-        v_denominators = v  - 1 / a0x - 1 / b0x
+        if OR:
+            denom = v  - 1/a0x - 1/b0x
+            Est_A = (B_plus - np.sum((1 + b0x / (a0x * np.exp(Lx))) / denom))**2
+            Est_B = (A_plus - np.sum((1 + a0x * np.exp(Lx)  / b0x ) / denom))**2
+        else:
+            denom = v - 1/a0x + 1/b0x
+            Est_A = (A_plus - np.sum((1 - np.exp(Lx)*a0x/b0x)/denom))**2
+            Est_B = (B_plus - np.sum((b0x/(np.exp(Lx)*a0x) - 1)/denom))**2
 
-        term1 = (B_plus - np.sum((1 + b0x / (a0x * np.exp(Lx))) / v_denominators))**2
-        term2 = (A_plus - np.sum((1 + a0x * np.exp(Lx)  / b0x ) / v_denominators))**2
-
-        return term1 + term2    
+        return Est_A + Est_B    
 
     # Perform minimization
     a0_b0_res = scipy.optimize.minimize(objective,[a0,b0],args=(v, Lx, z, p))
 
     # Get estimates for A and B
     a0_fit, b0_fit = a0_b0_res.x[0], a0_b0_res.x[1]
-    denom = v - 1/a0_fit - 1/b0_fit
-    A_num = 1 + (a0_fit/b0_fit)*np.exp(Lx)
-    B_num = 1 + (b0_fit/(a0_fit*np.exp(Lx)))
-    A_fit = A_num / denom
-    B_fit = B_num / denom
+    if OR:
+        denom = v - 1/a0_fit - 1/b0_fit
+        A_num = 1 + (a0_fit/b0_fit)*np.exp(Lx)
+        B_num = 1 + (b0_fit/(a0_fit*np.exp(Lx)))
+        A_fit = A_num / denom
+        B_fit = B_num / denom
+    else:
+        denom = v - 1/a0_fit + 1/b0_fit
+        A_num = 1 - np.exp(Lx)*a0_fit/b0_fit
+        B_num = b0_fit/(np.exp(Lx)*a0_fit) - 1
+        A_fit = A_num / denom
+        B_fit = B_num / denom
 
     return A_fit, B_fit, a0_fit, b0_fit
