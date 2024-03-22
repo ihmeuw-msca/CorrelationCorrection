@@ -28,7 +28,7 @@ class IterativeFitting:
 
         self.n = L.shape[0]
 
-    def convexProgram(self, constraints=[], A_const = False, N_const=False, M1_const=False):
+    def convexProgram(self, constraints=[], A_const = False, N_const=False, M1_const=False, OR=True):
         """Solves the convex minimization problem of the paper.
         Note that every "constraints" argument must have elements defined as lambda functions of the form:
             lambda A,N,M1: cp.sum(A) == 115 
@@ -45,13 +45,22 @@ class IterativeFitting:
         L = self.L.copy()
         A = cp.Variable(shape=self.n)
         constraints_eval = [c(A,N,M1) for c in constraints]
-        obj = cp.Minimize(
-            cp.scalar_product(-L, A) -
-            cp.entr(M1 - cp.sum(A)) - (M1 - cp.sum(A)) +
-            cp.sum(-cp.entr(N[1:] - A) - (N[1:] - A)) +
-            cp.sum(-cp.entr(A) - A) -
-            cp.entr(N[0] - M1 + cp.sum(A)) - (N[0] - M1 + cp.sum(A)) 
-        )
+        if OR:
+            obj = cp.Minimize(
+                cp.scalar_product(-L, A) -
+                cp.entr(M1 - cp.sum(A)) - (M1 - cp.sum(A)) +
+                cp.sum(-cp.entr(N[1:] - A) - (N[1:] - A)) +
+                cp.sum(-cp.entr(A) - A) -
+                cp.entr(N[0] - M1 + cp.sum(A)) - (N[0] - M1 + cp.sum(A)) 
+            )
+        else:
+            log_N = np.log(N[1:])
+            log_n0 = np.log(N[0])
+            obj = cp.Minimize(
+                cp.scalar_product(-L,A) + 
+                cp.sum(cp.entr(A) - A) + 
+                cp.entr(M1 - cp.sum(A)) - M1 + cp.sum(A)
+            )
         if len(constraints) > 0:
             problem = cp.Problem(obj, constraints_eval)
             problem.solve(solver=cp.ECOS)
@@ -64,10 +73,16 @@ class IterativeFitting:
             return A, N, M1
         problem = cp.Problem(obj)
         problem.solve(solver=cp.ECOS)
-        self.A_cvx = A.value
-        self.B_cvx = N[1:] - self.A_cvx
-        self.a0_cvx = M1 - np.sum(self.A_cvx)
-        self.b0_cvx = N[0] - M1 + np.sum(self.A_cvx)
+        if OR:
+            self.A_cvx = A.value
+            self.B_cvx = N[1:] - self.A_cvx
+            self.a0_cvx = M1 - np.sum(self.A_cvx)
+            self.b0_cvx = N[0] - M1 + np.sum(self.A_cvx)
+        else:
+            self.A_cvx = A.value
+            self.B_cvx = N[1:]
+            self.a0_cvx = M1 - np.sum(self.A_cvx)
+            self.b0_cvx = N[0]
         return self.A_cvx, self.B_cvx, self.a0_cvx, self.b0_cvx
 
     def GL_linesearch(self):
@@ -155,7 +170,6 @@ class IterativeFitting:
             e = L + np.log(a0) + np.log(B) - np.log(A) - np.log(b0)
             H = np.ones((self.n,self.n))*c0
             H += np.diag(c)
-            print(H, e)
             A += scipy.linalg.solve(H,e,assume_a="pos")
             i += 1
             diff = np.linalg.norm(A1 - A)
