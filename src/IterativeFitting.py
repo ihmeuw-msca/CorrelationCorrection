@@ -57,8 +57,8 @@ class IterativeFitting:
             log_N = np.log(N[1:])
             log_n0 = np.log(N[0])
             obj = cp.Minimize(
-                cp.scalar_product(-L,A) + 
-                cp.sum(cp.entr(A) - A) + 
+                cp.scalar_product(A,(-L - log_N + log_n0)) + 
+                cp.sum(-cp.entr(A) - A) - 
                 cp.entr(M1 - cp.sum(A)) - M1 + cp.sum(A)
             )
         if len(constraints) > 0:
