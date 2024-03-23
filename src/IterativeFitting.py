@@ -158,6 +158,8 @@ class IterativeFitting:
             if OR:
                 b0 = N[0] - a0
                 B = N[1:] - A
+                if np.any(B <= 0):
+                    print("There is an element of B < 0")
                 c0 = 1/a0 + 1/b0
                 c = 1/A + 1/B
             else:
