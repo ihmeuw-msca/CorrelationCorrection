@@ -82,7 +82,13 @@ def ham_solved(b0,B,M1,Lx,v,a0,OR=True):
         return Est_A + Est_B    
 
     # Perform minimization
-    a0_b0_res = scipy.optimize.minimize(objective,[a0,b0],args=(v, Lx, z, p))
+    constraints = [
+            # Existing constraints
+            {'type': 'ineq', 'fun': lambda x: 1/(z * (1 - p)) * x[0] - x[1]-1}, # Ensuring a0 >= 1, 
+            {'type': 'ineq', 'fun': lambda x: p/(1-p)*x[0] - 1},  # Ensuring b0 >= 1, B_+ >= 1 
+            {'type': 'ineq', 'fun': lambda x: x[1] -1}  # ensuring A_+ >= 1
+        ]
+    a0_b0_res = scipy.optimize.minimize(objective,[a0,b0],args=(v, Lx, z, p),constraints=constraints,method="SLSQP")
 
     # Get estimates for A and B
     a0_fit, b0_fit = a0_b0_res.x[0], a0_b0_res.x[1]
