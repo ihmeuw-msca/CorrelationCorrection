@@ -3,24 +3,6 @@ import numpy as np
 def covariance_matrix(Ax,Bx,a0x,b0x,v):
     """Constructs covariance matrix according to Greenland and Longnecker
     """
-    # if cvx:
-    #     it_fit.convexProgram()
-    #     Ax = it_fit.A_cvx
-    #     Bx = it_fit.B_cvx
-    #     a0x = it_fit.a0_cvx
-    #     b0x = it_fit.b0_cvx
-    # if GLL:
-    #     it_fit.GL_linesearch()
-    #     Ax = it_fit.A_GLL
-    #     Bx = it_fit.B_GLL
-    #     a0x = it_fit.a0_GLL
-    #     b0x = it_fit.b0_GLL
-    # if GL:
-    #     it_fit.GL()
-    #     Ax = it_fit.A_GL
-    #     Bx = it_fit.B_GL
-    #     a0x = it_fit.a0_GL
-    #     b0x = it_fit.b0_GL
     n = Ax.shape[0]
     s = np.sqrt(1/Ax + 1/Bx + 1/a0x + 1/b0x)
     r = ((1/np.outer(s,s))*(1/a0x + 1/b0x))[np.triu_indices(n,k=1)]
