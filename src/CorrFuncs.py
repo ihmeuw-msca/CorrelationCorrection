@@ -7,13 +7,11 @@ def covariance_matrix(Ax,Bx,a0x,b0x,v):
     s = np.sqrt(1/Ax + 1/Bx + 1/a0x + 1/b0x)
     r = ((1/np.outer(s,s))*(1/a0x + 1/b0x))[np.triu_indices(n,k=1)]
     c = r*np.sqrt((np.outer(v,v))[np.triu_indices(n,k=1)])
-    C1 = np.diag(v)
     triu_indices = np.triu_indices(n,k=1)
-    tril_indices = np.tril_indices(n,k=-1)
-    C2 = C1.copy()
+    C2 = np.zeros((n,n))
     C2[triu_indices] = c
-    C = C2.copy()
-    C[tril_indices] = c
+    C = C2 + C2.T
+    C += np.diag(v)
     return C
 
 def trend_est(Ax,Bx,a0x,b0x,v,x,L,unadj=False):
