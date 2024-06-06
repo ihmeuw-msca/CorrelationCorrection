@@ -72,7 +72,7 @@ class IterativeFitting:
                 return A, M1
             return A, N, M1
         problem = cp.Problem(obj)
-        problem.solve(solver=cp.ECOS)
+        problem.solve(solver=cp.CLARABEL)
         if OR:
             self.A_cvx = A.value
             self.B_cvx = N[1:] - self.A_cvx
