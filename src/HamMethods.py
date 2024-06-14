@@ -30,10 +30,10 @@ def ham_vanilla(p0,z0,Lx,v,x_feas,OR=True):
     # Perform minimization
     # x_feas = np.array([10/np.min(v),10/np.min(v)])
     # x_feas = np.array([a0,b0])
-    a0_b0_res = scipy.optimize.minimize(f_LogLik,x_feas,args=(p0,z0,Lx,v))
+    a0_b0_res = scipy.optimize.minimize(f_LogLik,x_feas,args=(p0,z0,Lx,v),options={"disp":False})
 
     # Get estimates for A and B
-    print("Optimization results:",a0_b0_res)
+    # print("Optimization results:",a0_b0_res)
     a0_fit, b0_fit = a0_b0_res.x[0], a0_b0_res.x[1]
     if OR:
         denom = v - 1/a0_fit - 1/b0_fit
@@ -133,8 +133,8 @@ def ham_solved(b0,B,M1,Lx,v,a0,OR=True):
     vec_constraint_b0 = scipy.optimize.NonlinearConstraint(nonlinear_constraint_b0,0,np.inf)
     constraints = [vec_constraint_A,vec_constraint_B,vec_constraint_a0,vec_constraint_b0]
     x_feas = np.array([a0,b0])
-    a0_b0_res = scipy.optimize.minimize(objective,x_feas,args=(v, Lx, z, p),method="trust-constr",constraints=constraints)
-    print("Optimization results:",a0_b0_res)
+    a0_b0_res = scipy.optimize.minimize(objective,x_feas,args=(v, Lx, z, p),method="trust-constr",constraints=constraints,options={"disp":False})
+    # print("Optimization results:",a0_b0_res)
     # Get estimates for A and B
     a0_fit, b0_fit = a0_b0_res.x[0], a0_b0_res.x[1]
     if OR:
