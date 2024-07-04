@@ -1,0 +1,6 @@
+Metadata-Version: 2.1
+Name: correlation_correction
+Version: 0.1.dev65+gd976474.d20240704
+Requires-Dist: cvxpy==1.5.1
+Requires-Dist: numpy==1.26.4
+Requires-Dist: scipy==1.13.0

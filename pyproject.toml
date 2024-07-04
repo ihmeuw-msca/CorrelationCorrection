@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=62", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "correlation_correction"
+dynamic = ["version"]
+dependencies = [
+  "cvxpy==1.5.1",
+  "numpy==1.26.4",
+  "scipy==1.13.0",
+]
+
+[tool.setuptools]
+packages = ["correlation_correction"]
+
+[tool.setuptools_scm]
+version_file = "correlation_correction/_version.py"
