@@ -1,20 +1,31 @@
-import scipy
-import numpy as np
 import cvxpy as cp
+import numpy as np
+import scipy
+from numpy.typing import NDArray
 
-def convex_GL(L, N, M1, constraints=[], A_const=False, N_const=False, M1_const=False, OR=True):
+
+def convex_GL(
+    L: NDArray,
+    N: NDArray,
+    M1,
+    constraints=None,
+    A_const=False,
+    N_const=False,
+    M1_const=False,
+    OR=True,
+) -> tuple[NDArray, NDArray, np.float, np.float]:
     r"""Function that will solve the convex optimization problem
-    G(A) = -L^\top A + (a_0(A)log(a_0(A)) - a_0(A)) + \sum_{i=1}^{n}(B_i(A)log(B_i(A)) - B_i(A)) + 
+    G(A) = -L^\top A + (a_0(A)log(a_0(A)) - a_0(A)) + \sum_{i=1}^{n}(B_i(A)log(B_i(A)) - B_i(A)) +
             \sum_{i=1}^{n}(A_ilog(A_i) - A_i) + (b_0(A)log(b_0(A)) - b_0(A))
 
     using Disciplined Convex Programming via cvxpy. No initialization required.
- 
+
     Parameters
     ----------
     L
         The nx1 vector of LOG ORs or RRs for each exposure level.
     N
-        The (n+1)x1 vector of subjects for each exposure level. 
+        The (n+1)x1 vector of subjects for each exposure level.
     M1
         The integer of total number of cases in the study.
     constraints
@@ -36,11 +47,11 @@ def convex_GL(L, N, M1, constraints=[], A_const=False, N_const=False, M1_const=F
     Notes
     -------
     Note that every "constraints" argument must have elements defined as lambda functions of the form:
-            lambda A,N,M1: cp.sum(A) == 115 
+            lambda A,N,M1: cp.sum(A) == 115
     (as an example). This is because A, N, M1 are not being defined until the function is called.
 
     """
-    
+
     # Get number of exposure levels
     n = L.shape[0]
 
@@ -56,26 +67,34 @@ def convex_GL(L, N, M1, constraints=[], A_const=False, N_const=False, M1_const=F
     else:
         M1 = cp.variable()
 
+    # Checking if we want to pass in any constraints or not.
+    if constraints is None:
+        constraints = []
+
     # Create L, A, and constraints (if they exist) for cvxpy.
     L = L.copy()
     A = cp.Variable(shape=n)
-    constraints_eval = [c(A,N,M1) for c in constraints]
+    constraints_eval = [c(A, N, M1) for c in constraints]
     # Construct objective function
     if OR:
         obj = cp.Minimize(
-            cp.scalar_product(-L, A) -
-            cp.entr(M1 - cp.sum(A)) - (M1 - cp.sum(A)) +
-            cp.sum(-cp.entr(N[1:] - A) - (N[1:] - A)) +
-            cp.sum(-cp.entr(A) - A) -
-            cp.entr(N[0] - M1 + cp.sum(A)) - (N[0] - M1 + cp.sum(A)) 
+            cp.scalar_product(-L, A)
+            - cp.entr(M1 - cp.sum(A))
+            - (M1 - cp.sum(A))
+            + cp.sum(-cp.entr(N[1:] - A) - (N[1:] - A))
+            + cp.sum(-cp.entr(A) - A)
+            - cp.entr(N[0] - M1 + cp.sum(A))
+            - (N[0] - M1 + cp.sum(A))
         )
     else:
         log_N = np.log(N[1:])
         log_n0 = np.log(N[0])
         obj = cp.Minimize(
-            cp.scalar_product(A,(-L - log_N + log_n0)) + 
-            cp.sum(-cp.entr(A) - A) - 
-            cp.entr(M1 - cp.sum(A)) - M1 + cp.sum(A)
+            cp.scalar_product(A, (-L - log_N + log_n0))
+            + cp.sum(-cp.entr(A) - A)
+            - cp.entr(M1 - cp.sum(A))
+            - M1
+            + cp.sum(A)
         )
 
     # Solves constrained optimization problem and returns desired values (held constant if desired)
@@ -89,7 +108,7 @@ def convex_GL(L, N, M1, constraints=[], A_const=False, N_const=False, M1_const=F
         if A_const and M1_const:
             return A, M1
         return A, N, M1
-    
+
     # Solves unconstrained optimization problem
     problem = cp.Problem(obj)
     problem.solve(solver=cp.CLARABEL)
@@ -112,7 +131,7 @@ def GL(L, A0, N, M1, OR=True, i_ret=False):
     r"""Function that will solve solve the rootfinding problem of the gradient function
     g(A) = -L - log(a_0(A))1 - log(B(A)) + log(A) + log(b_0(A))
     according to Greenland and Longnecker via Newton's method.
-    
+
     Parameters
     ----------
     L
@@ -120,7 +139,7 @@ def GL(L, A0, N, M1, OR=True, i_ret=False):
     A0
         The nx1 vector of reported cases or null expected value cases. Serves as initial guess for rootfinding procedure.
     N
-        The (n+1)x1 vector of subjects for each exposure level. 
+        The (n+1)x1 vector of subjects for each exposure level.
     M1
         The integer of total number of cases in the study.
     OR
@@ -154,31 +173,31 @@ def GL(L, A0, N, M1, OR=True, i_ret=False):
             B = N[1:] - A
             if np.any(B <= 0):
                 print("There is an element of B < 0")
-            c0 = 1/a0 + 1/b0
-            c = 1/A + 1/B
+            c0 = 1 / a0 + 1 / b0
+            c = 1 / A + 1 / B
         else:
             b0 = N[0]
             B = N[1:]
-            c0 = 1/a0
-            c = 1/A
+            c0 = 1 / a0
+            c = 1 / A
 
         # Gradient step in Newton's Method and get ∆A
         e = L + np.log(a0) + np.log(B) - np.log(A) - np.log(b0)
 
         # Create Hessian matrix
-        H = np.ones((n,n))*c0
+        H = np.ones((n, n)) * c0
         H += np.diag(c)
 
         # Update A according to Newton's method
-        A += scipy.linalg.solve(H,e,assume_a="pos")
+        A += scipy.linalg.solve(H, e, assume_a="pos")
         i += 1
         diff = np.linalg.norm(A1 - A)
-    
+
     # Get other counts from A
     B = N[1:] - A
     a0 = M1 - A.sum()
     b0 = N[0] - a0
-    
+
     # Return with or without iteration numbers
     if ~i_ret:
         return A, a0, B, b0, i
