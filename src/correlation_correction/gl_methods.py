@@ -4,10 +4,10 @@ import scipy
 from numpy.typing import NDArray
 
 
-def convex_GL(
+def convex_gl(
     L: NDArray,
     N: NDArray,
-    M1,
+    M1: NDArray,
     constraints=None,
     A_const=False,
     N_const=False,
@@ -127,7 +127,9 @@ def convex_GL(
     return A_cvx, B_cvx, a0_cvx, b0_cvx
 
 
-def GL(L, A0, N, M1, OR=True, i_ret=False):
+def gl(
+    L: NDArray, A0: NDArray, N: NDArray, M1: NDArray, OR=True, i_ret=False
+) -> tuple[NDArray, NDArray, np.float64, np.float64]:
     r"""Function that will solve solve the rootfinding problem of the gradient function
     g(A) = -L - log(a_0(A))1 - log(B(A)) + log(A) + log(b_0(A))
     according to Greenland and Longnecker via Newton's method.

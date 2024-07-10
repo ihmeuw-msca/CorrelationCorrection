@@ -1,7 +1,7 @@
 import numpy as np
 
-from .GLMethods import GL, convex_GL
-from .HamMethods import ham_vanilla
+from .gl_methods import GL, convex_GL
+from .hamling_methods import ham_vanilla
 
 
 def covariance_matrix(L, A0, N, M1, p0, z0, x_feas, v, method, OR=True):
