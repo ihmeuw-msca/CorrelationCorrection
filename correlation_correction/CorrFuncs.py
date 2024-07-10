@@ -1,8 +1,11 @@
 import numpy as np
-from .GLMethods import *
-from .HamMethods import *
 
-def covariance_matrix(L,A0,N,M1,p0,z0,x_feas,v,method,OR=True):
+from .GLMethods import GL, convex_GL
+from .HamMethods import ham_vanilla
+
+
+def covariance_matrix(L, A0, N, M1, p0, z0, x_feas, v, method, OR=True):
+    # def covariance_matrix_gl(L, A0, N, M1, v, method, OR=True):
     # TODO: Split up covariance matrix for GL and Hamling methods
     r"""Function that creates the covariance matrix from estimated correlations via process explained in GL.
     Take Ax, Bx, a0x, and b0x to be pseudo-counts. Then estimated standard errors from pseudo-counts are:
@@ -13,7 +16,7 @@ def covariance_matrix(L,A0,N,M1,p0,z0,x_feas,v,method,OR=True):
         Cxz = rxz(vx*vz)^{1/2}
     for the variance elements of v vx and vz. This constructs the covariance matrix.
     Will take in necessary parameters to run either GL or Hamling-based methods and returns the desired covariance matrix.
- 
+
     Parameters
     ----------
     L
@@ -21,7 +24,7 @@ def covariance_matrix(L,A0,N,M1,p0,z0,x_feas,v,method,OR=True):
     A0
         The nx1 vector of reported cases or null expected value cases. Serves as initial guess for rootfinding procedure.
     N
-        The (n+1)x1 vector of subjects for each exposure level. 
+        The (n+1)x1 vector of subjects for each exposure level.
     M1
         The integer of total number of cases in the study.
     p0
@@ -46,40 +49,43 @@ def covariance_matrix(L,A0,N,M1,p0,z0,x_feas,v,method,OR=True):
         Covariance matrix to then be used in GLS to create estimates
 
     """
-    
+
     # Generating Ax, Bx, a0x, b0x depending on selected method.
     if method == "convex_GL":
-        Ax, Bx, a0x, b0x = convex_GL(L,N,M1,OR=OR)
+        Ax, Bx, a0x, b0x = convex_GL(L, N, M1, OR=OR)
     if method == "GL":
-        Ax, Bx, a0x, b0x = GL(L,A0,N,M1,OR=OR)
+        Ax, Bx, a0x, b0x = GL(L, A0, N, M1, OR=OR)
     if method == "ham_vanilla":
-        Ax, Bx, a0x, b0x = ham_vanilla(p0,z0,L,v,x_feas,OR=OR)
+        Ax, Bx, a0x, b0x = ham_vanilla(L, p0, z0, v, x_feas, OR=OR)
 
     # Calculates the covariance matrix according to math shown in description.
     n = Ax.shape[0]
-    s = np.sqrt(1/Ax + 1/Bx + 1/a0x + 1/b0x)
-    r = ((1/np.outer(s,s))*(1/a0x + 1/b0x))[np.triu_indices(n,k=1)]
-    c = r*np.sqrt((np.outer(v,v))[np.triu_indices(n,k=1)])
-    triu_indices = np.triu_indices(n,k=1)
-    C2 = np.zeros((n,n))
+    # Try using actual (reported) variances for s instead of constructing s. Hamling is the same here bc it matches the variances.
+    # s = np.sqrt(1 / Ax + 1 / Bx + 1 / a0x + 1 / b0x)
+    s = np.sqrt(v)
+    r = ((1 / np.outer(s, s)) * (1 / a0x + 1 / b0x))[np.triu_indices(n, k=1)]
+    # r = ((1 / np.outer(v, v)) * (1 / a0x + 1 / b0x))[np.triu_indices(n, k=1)]
+    c = r * np.sqrt((np.outer(v, v))[np.triu_indices(n, k=1)])
+    triu_indices = np.triu_indices(n, k=1)
+    C2 = np.zeros((n, n))
     C2[triu_indices] = c
     C = C2 + C2.T
     C += np.diag(v)
     return C
 
-def trend_est(Ax,Bx,a0x,b0x,v,x,L,unadj=False):
-    """Performs adjusted correlation on meta-analysis according to Greenland and Longnecker
-    """
+
+def trend_est(Ax, Bx, a0x, b0x, v, x, L, unadj=False):
+    """Performs adjusted correlation on meta-analysis according to Greenland and Longnecker"""
     # Calculating adjusted point and variance estimates
-    C = covariance_matrix(Ax,Bx,a0x,b0x,v)
+    C = covariance_matrix(Ax, Bx, a0x, b0x, v)
     Cinv = np.linalg.inv(C)
-    vb_star = 1/(np.dot(x,np.dot(Cinv,x)))
-    b_star = vb_star*(np.dot(x,np.dot(Cinv,L)))
+    vb_star = 1 / (np.dot(x, np.dot(Cinv, x)))
+    b_star = vb_star * (np.dot(x, np.dot(Cinv, L)))
 
     # Calculating unadjusted point and variance estimates if desired
     if unadj:
-        vb = 1/(np.dot(x,np.dot(np.linalg.inv(np.diag(v)),x)))
-        b = vb*(np.dot(x,np.dot(np.linalg.inv(np.diag(v)),L)))
+        vb = 1 / (np.dot(x, np.dot(np.linalg.inv(np.diag(v)), x)))
+        b = vb * (np.dot(x, np.dot(np.linalg.inv(np.diag(v)), L)))
         return b_star, vb_star, b, vb
-    
+
     return b_star, vb_star

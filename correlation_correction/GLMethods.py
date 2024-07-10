@@ -13,7 +13,7 @@ def convex_GL(
     N_const=False,
     M1_const=False,
     OR=True,
-) -> tuple[NDArray, NDArray, np.float, np.float]:
+) -> tuple[NDArray, NDArray, np.float64, np.float64]:
     r"""Function that will solve the convex optimization problem
     G(A) = -L^\top A + (a_0(A)log(a_0(A)) - a_0(A)) + \sum_{i=1}^{n}(B_i(A)log(B_i(A)) - B_i(A)) +
             \sum_{i=1}^{n}(A_ilog(A_i) - A_i) + (b_0(A)log(b_0(A)) - b_0(A))
