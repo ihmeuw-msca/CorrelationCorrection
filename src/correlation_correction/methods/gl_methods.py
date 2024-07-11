@@ -1,13 +1,17 @@
+from typing import Union
+
 import cvxpy as cp
 import numpy as np
 import scipy
 from numpy.typing import NDArray
 
+float_or_int = Union[np.float64, int]
+
 
 def convex_gl(
     L: NDArray,
     N: NDArray,
-    M1: int,
+    M1: float_or_int,
     constraints: list = None,
     A_const: bool = False,
     N_const: bool = False,
@@ -131,7 +135,7 @@ def gl(
     L: NDArray,
     A0: NDArray,
     N: NDArray,
-    M1: int,
+    M1: float_or_int,
     OR: bool = True,
     i_ret: bool = False,
 ) -> tuple[NDArray, NDArray, np.float64, np.float64]:

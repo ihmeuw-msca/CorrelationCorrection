@@ -1,10 +1,12 @@
-from typing import Optional, Union
+from typing import Union
 
 import numpy as np
 from numpy.typing import NDArray
 
 from .methods.gl_methods import convex_gl, gl
 from .methods.hamling_methods import hamling
+
+float_or_int = Union[np.float64, int]
 
 
 def _create_covariance_matrix(
@@ -54,7 +56,7 @@ def _create_covariance_matrix(
 def covariance_matrix_convex_gl(
     L: NDArray,
     N: NDArray,
-    M1: int,
+    M1: float_or_int,
     v: NDArray,
     constraints=None,
     A_const=False,
@@ -108,7 +110,7 @@ def covariance_matrix_gl(
     L: NDArray,
     A0: NDArray,
     N: NDArray,
-    M1: int,
+    M1: float_or_int,
     v: NDArray,
     OR: bool = True,
     i_ret: bool = False,
