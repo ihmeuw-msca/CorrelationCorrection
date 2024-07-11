@@ -7,12 +7,12 @@ from numpy.typing import NDArray
 def convex_gl(
     L: NDArray,
     N: NDArray,
-    M1: NDArray,
-    constraints=None,
-    A_const=False,
-    N_const=False,
-    M1_const=False,
-    OR=True,
+    M1: int,
+    constraints: list = None,
+    A_const: bool = False,
+    N_const: bool = False,
+    M1_const: bool = False,
+    OR: bool = True,
 ) -> tuple[NDArray, NDArray, np.float64, np.float64]:
     r"""Function that will solve the convex optimization problem
     G(A) = -L^\top A + (a_0(A)log(a_0(A)) - a_0(A)) + \sum_{i=1}^{n}(B_i(A)log(B_i(A)) - B_i(A)) +
@@ -63,7 +63,7 @@ def convex_gl(
 
     # Checking if we optimize over M1 or not. If yes, create as cvxpy variable.
     if ~M1_const:
-        M1 = M1.copy()
+        M1 = M1
     else:
         M1 = cp.variable()
 
@@ -128,7 +128,12 @@ def convex_gl(
 
 
 def gl(
-    L: NDArray, A0: NDArray, N: NDArray, M1: NDArray, OR=True, i_ret=False
+    L: NDArray,
+    A0: NDArray,
+    N: NDArray,
+    M1: int,
+    OR: bool = True,
+    i_ret: bool = False,
 ) -> tuple[NDArray, NDArray, np.float64, np.float64]:
     r"""Function that will solve solve the rootfinding problem of the gradient function
     g(A) = -L - log(a_0(A))1 - log(B(A)) + log(A) + log(b_0(A))
