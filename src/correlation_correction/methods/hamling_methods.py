@@ -1,7 +1,16 @@
-import scipy
 import numpy as np
+import scipy
+from numpy.typing import NDArray
 
-def ham_vanilla(L,p0,z0,v,x_feas,OR=True):
+
+def hamling(
+    L: NDArray,
+    p0: np.float64,
+    z0: np.float64,
+    v: NDArray,
+    x_feas: NDArray = None,
+    OR: bool = True,
+) -> tuple[NDArray, NDArray, np.float64, np.float64]:
     r"""Function that performs Hamling's method. Finds a0, b0 values to minimize the squared residual summed error:
             (p0-p1)^2/p0 + (z0-z1)^2/z0 .
     Uses equations defined directly in the Hamling paper. We introduce an initialization x_feas that always converges.
@@ -31,51 +40,58 @@ def ham_vanilla(L,p0,z0,v,x_feas,OR=True):
     Here we introduce p0 and z0 as parameters of the function. In the future, we could directly calculate p0,z0 inside this function.
 
     """
-    
+
+    # Initialize x_feas vecotr
+    if x_feas is None:
+        x_feas = np.array([10 / np.min(v), 10 / np.min(v)])
+
     # Defining function to optimize using scipy (off-the-shelf) minimization
-    def f_LogLik(C_Val,p0,z0,Lx,v):
+    def f_LogLik(C_Val, p0, z0, Lx, v):
         a0x = C_Val[0]
         b0x = C_Val[1]
 
         if OR:
-            Vextra = v - 1/a0x - 1/b0x
-            Est_A = (1 + (a0x/b0x)*np.exp(Lx))/(Vextra)
-            Est_B = (1 + b0x/(a0x*np.exp(Lx)))/(Vextra)
+            Vextra = v - 1 / a0x - 1 / b0x
+            Est_A = (1 + (a0x / b0x) * np.exp(Lx)) / (Vextra)
+            Est_B = (1 + b0x / (a0x * np.exp(Lx))) / (Vextra)
         else:
-            Vextra = v - 1/a0x + 1/b0x
-            Est_A = (1 - np.exp(Lx)*a0x/b0x)/(Vextra)
-            Est_B = (b0x/(np.exp(Lx)*a0x) - 1)/(Vextra)
+            Vextra = v - 1 / a0x + 1 / b0x
+            Est_A = (1 - np.exp(Lx) * a0x / b0x) / (Vextra)
+            Est_B = (b0x / (np.exp(Lx) * a0x) - 1) / (Vextra)
 
         SumA = a0x + np.sum(Est_A)
         SumB = b0x + np.sum(Est_B)
 
         p1 = b0x / SumB
-        F1 = ((p1-p0)/p0)**2
-        z1 = SumB/SumA
-        F2 = ((z1-z0)/z0)**2
+        F1 = ((p1 - p0) / p0) ** 2
+        z1 = SumB / SumA
+        F2 = ((z1 - z0) / z0) ** 2
 
         return F1 + F2
 
     # Perform minimization
-    a0_b0_res = scipy.optimize.minimize(f_LogLik,x_feas,args=(p0,z0,L,v),options={"disp":False})
+    a0_b0_res = scipy.optimize.minimize(
+        f_LogLik, x_feas, args=(p0, z0, L, v), options={"disp": False}
+    )
 
     # Get estimates for A and B
     a0_fit, b0_fit = a0_b0_res.x[0], a0_b0_res.x[1]
     if OR:
-        denom = v - 1/a0_fit - 1/b0_fit
-        A_num = 1 + (a0_fit/b0_fit)*np.exp(L)
-        B_num = 1 + (b0_fit/(a0_fit*np.exp(L)))
+        denom = v - 1 / a0_fit - 1 / b0_fit
+        A_num = 1 + (a0_fit / b0_fit) * np.exp(L)
+        B_num = 1 + (b0_fit / (a0_fit * np.exp(L)))
         A_fit = A_num / denom
         B_fit = B_num / denom
     else:
-        denom = v - 1/a0_fit + 1/b0_fit
-        A_num = (1 - np.exp(L)*a0_fit/b0_fit)
-        B_num = (b0_fit/(np.exp(L)*a0_fit) - 1)
+        denom = v - 1 / a0_fit + 1 / b0_fit
+        A_num = 1 - np.exp(L) * a0_fit / b0_fit
+        B_num = b0_fit / (np.exp(L) * a0_fit) - 1
         A_fit = A_num / denom
         B_fit = B_num / denom
 
     # Return a0, b0 in that order
     return A_fit, B_fit, a0_fit, b0_fit
+
 
 # def ham_solved(b0,B,M1,Lx,v,a0,OR=True):
 
@@ -100,7 +116,7 @@ def ham_vanilla(L,p0,z0,v,x_feas,OR=True):
 #         b0x = C_val[1]
 #         B_plus = ((1-p)/p)*b0x
 #         A_plus = (1/(z*p))*b0x - a0x
-        
+
 #         # Ensure denominators are always positive
 #         if OR:
 #             denom = v  - 1/a0x - 1/b0x
@@ -111,14 +127,14 @@ def ham_vanilla(L,p0,z0,v,x_feas,OR=True):
 #             Est_A = (A_plus - np.sum((1 - np.exp(Lx)*a0x/b0x)/denom))**2
 #             Est_B = (B_plus - np.sum((b0x/(np.exp(Lx)*a0x) - 1)/denom))**2
 
-#         return Est_A + Est_B    
+#         return Est_A + Est_B
 #       # Constsruct objective to minimize
 #     # def objective(C_val,v,Lx,z,p):
 #     #     A_plus = C_val[0]
 #     #     B_plus = C_val[1]
 #     #     a0x = a0(B_plus, A_plus, z, p)
 #     #     b0x = b0(B_plus,p)
-        
+
 #     #     # Ensure denominators are always positive
 #     #     if OR:
 #     #         denom = v  - 1/a0x - 1/b0x
@@ -129,7 +145,7 @@ def ham_vanilla(L,p0,z0,v,x_feas,OR=True):
 #     #         Est_A = (A_plus - np.sum((1 - np.exp(Lx)*a0x/b0x)/denom))**2
 #     #         Est_B = (B_plus - np.sum((b0x/(np.exp(Lx)*a0x) - 1)/denom))**2
 
-#     #     return Est_A + Est_B    
+#     #     return Est_A + Est_B
 
 #     # Perform minimization
 #     # x_feas = np.array([10/np.min(v),10/np.min(v)])

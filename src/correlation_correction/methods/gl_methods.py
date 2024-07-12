@@ -1,19 +1,23 @@
+from typing import Union
+
 import cvxpy as cp
 import numpy as np
 import scipy
 from numpy.typing import NDArray
 
+float_or_int = Union[np.float64, int]
 
-def convex_GL(
+
+def convex_gl(
     L: NDArray,
     N: NDArray,
-    M1,
-    constraints=None,
-    A_const=False,
-    N_const=False,
-    M1_const=False,
-    OR=True,
-) -> tuple[NDArray, NDArray, np.float, np.float]:
+    M1: float_or_int,
+    constraints: list = None,
+    A_const: bool = False,
+    N_const: bool = False,
+    M1_const: bool = False,
+    OR: bool = True,
+) -> tuple[NDArray, NDArray, np.float64, np.float64]:
     r"""Function that will solve the convex optimization problem
     G(A) = -L^\top A + (a_0(A)log(a_0(A)) - a_0(A)) + \sum_{i=1}^{n}(B_i(A)log(B_i(A)) - B_i(A)) +
             \sum_{i=1}^{n}(A_ilog(A_i) - A_i) + (b_0(A)log(b_0(A)) - b_0(A))
@@ -63,7 +67,7 @@ def convex_GL(
 
     # Checking if we optimize over M1 or not. If yes, create as cvxpy variable.
     if ~M1_const:
-        M1 = M1.copy()
+        M1 = M1
     else:
         M1 = cp.variable()
 
@@ -127,7 +131,14 @@ def convex_GL(
     return A_cvx, B_cvx, a0_cvx, b0_cvx
 
 
-def GL(L, A0, N, M1, OR=True, i_ret=False):
+def gl(
+    L: NDArray,
+    A0: NDArray,
+    N: NDArray,
+    M1: float_or_int,
+    OR: bool = True,
+    i_ret: bool = False,
+) -> tuple[NDArray, NDArray, np.float64, np.float64]:
     r"""Function that will solve solve the rootfinding problem of the gradient function
     g(A) = -L - log(a_0(A))1 - log(B(A)) + log(A) + log(b_0(A))
     according to Greenland and Longnecker via Newton's method.
