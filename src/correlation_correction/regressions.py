@@ -150,7 +150,7 @@ def covariance_matrix_hamling(
     p0: np.float64,
     z0: np.float64,
     v: NDArray,
-    x_feas: NDArray,
+    x_feas: NDArray = None,
     OR: bool = True,
 ) -> NDArray:
     r"""Function that will take in necessary parameters to run hamling method and returns the desired covariance matrix, calling
@@ -178,6 +178,9 @@ def covariance_matrix_hamling(
 
 
     """
+    if x_feas is None:
+        x_feas = np.array([10 / np.min(v), 10 / np.min(v)])
+
     Ax, Bx, a0x, b0x = hamling(L, p0, z0, v, x_feas, OR)
     return _create_covariance_matrix(Ax, Bx, a0x, b0x, v)
 

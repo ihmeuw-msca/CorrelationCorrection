@@ -8,7 +8,7 @@ def hamling(
     p0: np.float64,
     z0: np.float64,
     v: NDArray,
-    x_feas: NDArray,
+    x_feas: NDArray = None,
     OR: bool = True,
 ) -> tuple[NDArray, NDArray, np.float64, np.float64]:
     r"""Function that performs Hamling's method. Finds a0, b0 values to minimize the squared residual summed error:
@@ -40,6 +40,10 @@ def hamling(
     Here we introduce p0 and z0 as parameters of the function. In the future, we could directly calculate p0,z0 inside this function.
 
     """
+
+    # Initialize x_feas vecotr
+    if x_feas is None:
+        x_feas = np.array([10 / np.min(v), 10 / np.min(v)])
 
     # Defining function to optimize using scipy (off-the-shelf) minimization
     def f_LogLik(C_Val, p0, z0, Lx, v):
