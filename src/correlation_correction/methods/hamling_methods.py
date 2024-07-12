@@ -8,7 +8,7 @@ def hamling(
     p0: np.float64,
     z0: np.float64,
     v: NDArray,
-    x_feas: NDArray = None,
+    x_feas: NDArray | None = None,
     OR: bool = True,
 ) -> tuple[NDArray, NDArray, np.float64, np.float64]:
     r"""Function that performs Hamling's method. Finds a0, b0 values to minimize the squared residual summed error:

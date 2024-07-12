@@ -5,6 +5,7 @@ from numpy.testing import assert_approx_equal, assert_array_equal
 import correlation_correction.methods.gl_methods as gl
 
 
+# Return a dictionary instead of a tuple for data where keys explain what everything means.
 @pytest.fixture
 def data_OR():
     np.random.seed(123)
@@ -46,6 +47,7 @@ def test_sum_cases_OR(data_OR):
 
 def test_subjects_OR(data_OR):
     A, B, a0, b0 = gl.convex_gl(*data_OR)
+    # Change here to np.hstack
     A_n = np.insert(A, 0, a0)
     B_n = np.insert(B, 0, b0)
     assert_array_equal(

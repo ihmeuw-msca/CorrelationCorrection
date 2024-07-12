@@ -39,6 +39,7 @@ def data_RR():
     )
 
 
+# Add test for p and z
 def test_positive_A_OR(data_OR):
     A, _, a0, _ = ham.hamling(*data_OR)
     A_n = np.insert(A, 0, a0)

@@ -28,7 +28,7 @@ def test_symmetry(cov_matrix):
     )
 
 
-def test_positive_definite(cov_matrix):
+def test_positive_semi_definite(cov_matrix):
     assert np.all(
         np.linalg.eigvals(cov_matrix) >= 0
     ), "Covariance matrix is not positive semi-definite."

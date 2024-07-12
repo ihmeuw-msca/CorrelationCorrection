@@ -7,12 +7,14 @@ from numpy.typing import NDArray
 
 float_or_int = Union[np.float64, int]
 
+# change np.float64 to float
+
 
 def convex_gl(
     L: NDArray,
     N: NDArray,
     M1: float_or_int,
-    constraints: list = None,
+    constraints: list | None = None,
     A_const: bool = False,
     N_const: bool = False,
     M1_const: bool = False,
