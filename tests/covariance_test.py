@@ -8,18 +8,18 @@ from correlation_correction.regressions import _create_covariance_matrix
 @pytest.fixture
 def data():
     np.random.seed(123)
-    return (
-        np.random.randint(low=30, high=300, size=3),
-        np.random.randint(low=30, high=300, size=3),
-        np.random.randint(low=30, high=300),
-        np.random.randint(low=30, high=300),
-        np.random.randn(3) ** 2,
-    )
+    return {
+        "A": np.random.randint(low=30, high=300, size=3),
+        "B": np.random.randint(low=30, high=300, size=3),
+        "a0": np.random.randint(low=30, high=300),
+        "b0": np.random.randint(low=30, high=300),
+        "v": np.random.randn(3) ** 2,
+    }
 
 
 @pytest.fixture
 def cov_matrix(data):
-    return _create_covariance_matrix(*data)
+    return _create_covariance_matrix(*(tuple(data.values())))
 
 
 def test_symmetry(cov_matrix):
