@@ -41,7 +41,7 @@ def data_RR():
 def test_sum_cases_OR(data_OR):
     dc = gl.convex_gl(*(tuple(data_OR.values())))
     assert (
-        dc.A_sum() == data_OR["M"]
+        dc.A_sum == data_OR["M"]
     ), "Sum of pseudo-cases does not match actual sum of cases."
 
 
@@ -58,7 +58,7 @@ def test_subjects_OR(data_OR):
 
 def test_match_ratios_OR(data_OR):
     dc = gl.convex_gl(*(tuple(data_OR.values())))
-    L = dc.log_ratio()
+    L = dc.log_ratio
     assert_approx_equal(
         np.sum(data_OR["log odds-L"]),
         np.sum(L),
@@ -70,7 +70,7 @@ def test_match_ratios_OR(data_OR):
 def test_sum_cases_RR(data_RR):
     dc = gl.convex_gl(*(tuple(data_RR.values())))
     assert (
-        dc.A_sum() == data_RR["M"]
+        dc.A_sum == data_RR["M"]
     ), "Sum of pseudo-cases does not match actual sum of cases."
 
 
@@ -87,7 +87,7 @@ def test_subjects_RR(data_RR):
 
 def test_match_ratios_RR(data_RR):
     dc = gl.convex_gl(*(tuple(data_RR.values())))
-    L = dc.log_ratio()
+    L = dc.log_ratio
     assert_approx_equal(
         np.sum(data_RR["log relative risk-L"]),
         np.sum(L),

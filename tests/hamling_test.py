@@ -53,7 +53,7 @@ def test_positive_B_OR(data_OR):
 
 def test_match_p_OR(data_OR):
     dc = ham.hamling(*(tuple(data_OR.values())))
-    p = dc.b0 / (dc.B_sum())
+    p = dc.b0 / (dc.B_sum)
     assert_approx_equal(
         data_OR["p"],
         p,
@@ -64,7 +64,7 @@ def test_match_p_OR(data_OR):
 
 def test_match_z_OR(data_OR):
     dc = ham.hamling(*(tuple(data_OR.values())))
-    z = (dc.B_sum()) / (dc.A_sum())
+    z = (dc.B_sum) / (dc.A_sum)
     assert_approx_equal(
         data_OR["z"],
         z,
@@ -75,7 +75,7 @@ def test_match_z_OR(data_OR):
 
 def test_match_OR(data_OR):
     dc = ham.hamling(*(tuple(data_OR.values())))
-    L = dc.log_ratio()
+    L = dc.log_ratio
     assert_approx_equal(
         np.sum(data_OR["log odds-L"]),
         np.sum(L),
@@ -98,7 +98,7 @@ def test_positive_B_RR(data_RR):
 
 def test_match_p_RR(data_RR):
     dc = ham.hamling(*(tuple(data_RR.values())))
-    p = dc.b0 / (dc.B_sum())
+    p = dc.b0 / (dc.B_sum)
     assert_approx_equal(
         data_RR["p"],
         p,
@@ -109,7 +109,7 @@ def test_match_p_RR(data_RR):
 
 def test_match_z_RR(data_RR):
     dc = ham.hamling(*(tuple(data_RR.values())))
-    z = (dc.B_sum()) / (dc.A_sum())
+    z = (dc.B_sum) / (dc.A_sum)
     assert_approx_equal(
         data_RR["z"],
         z,
@@ -120,7 +120,7 @@ def test_match_z_RR(data_RR):
 
 def test_match_RR(data_RR):
     dc = ham.hamling(*(tuple(data_RR.values())))
-    L = dc.log_ratio()
+    L = dc.log_ratio
     assert_approx_equal(
         np.sum(data_RR["log relative risk-L"]),
         np.sum(L),
