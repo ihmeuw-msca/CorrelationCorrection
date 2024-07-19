@@ -22,29 +22,20 @@ class Counts:
     counts and simply requires one argument: the reported variances.
     """
 
-    def __init__(self, A: NDArray, B: NDArray, a0: float, b0: float):
-        self.n = A.shape[0]
+    A: NDArray
+    B: NDArray
+    a0: float
+    b0: float
 
-        A_n = np.hstack((a0, A))
-        B_n = np.hstack((b0, B))
+    def __post_init__(self):
+        A_n = np.hstack((self.a0, self.A))
+        B_n = np.hstack((self.b0, self.B))
 
         self.data = np.vstack((A_n, B_n)).T
 
     @property
-    def A(self) -> NDArray:
-        return self.data[1:, 0]
-
-    @property
-    def B(self) -> NDArray:
-        return self.data[1:, 1]
-
-    @property
-    def a0(self) -> float:
-        return self.data[0, 0]
-
-    @property
-    def b0(self) -> float:
-        return self.data[0, 1]
+    def n(self) -> int:
+        return self.A.shape[0]
 
     @property
     def A_sum(self) -> float:
@@ -58,7 +49,6 @@ class Counts:
     def log_ratio(self) -> float:
         return np.log((self.A * self.b0) / (self.B * self.a0))
 
-    @property
     def cov(self, v: NDArray) -> NDArray:
         r"""Function that will take in necessary parameters to run gl method and returns the desired covariance matrix, calling
         _create_covariance_matrix function.
