@@ -3,8 +3,8 @@ from typing import Union
 import numpy as np
 from numpy.typing import NDArray
 
-from .methods.gl_methods import convex_gl, gl
-from .methods.hamling_methods import hamling
+# from .methods.gl_methods import convex_gl, gl
+# from .methods.hamling_methods import hamling
 
 float_or_int = Union[np.float64, int]
 
@@ -53,136 +53,136 @@ def _create_covariance_matrix(
     return C
 
 
-def covariance_matrix_convex_gl(
-    L: NDArray,
-    N: NDArray,
-    M1: float_or_int,
-    v: NDArray,
-    constraints=None,
-    A_const=False,
-    N_const=False,
-    M1_const=False,
-    OR=True,
-) -> NDArray:
-    r"""Function that will take in necessary parameters to run convex_gl method and returns the desired covariance matrix, calling
-    _create_covariance_matrix function.
+# def covariance_matrix_convex_gl(
+#     L: NDArray,
+#     N: NDArray,
+#     M1: float_or_int,
+#     v: NDArray,
+#     constraints=None,
+#     A_const=False,
+#     N_const=False,
+#     M1_const=False,
+#     OR=True,
+# ) -> NDArray:
+#     r"""Function that will take in necessary parameters to run convex_gl method and returns the desired covariance matrix, calling
+#     _create_covariance_matrix function.
 
-    Parameters
-    ----------
-    L
-        The nx1 vector of LOG ORs or RRs for each exposure level.
-    N
-        The (n+1)x1 vector of subjects for each exposure level.
-    M1
-        The integer of total number of cases in the study.
-    v
-        The nx1 vector of reported variances. Must be variances not standard errors.
-    constraints
-        If list nonempty, enforces constraints on optimization problem. See notes for list requirements.
-    A_const
-        Boolean variable that optimizes over possible A if False, holds constant if True.
-    N_const
-        Boolean variable that optimizes over possible N if False, holds constant if True.
-    M1_const
-        Boolean variable that optimizes over possible M1 if False, holds constant if True.
-    OR
-        Boolean variable that performs GL convex optimization for OR if True, RR if False.
+#     Parameters
+#     ----------
+#     L
+#         The nx1 vector of LOG ORs or RRs for each exposure level.
+#     N
+#         The (n+1)x1 vector of subjects for each exposure level.
+#     M1
+#         The integer of total number of cases in the study.
+#     v
+#         The nx1 vector of reported variances. Must be variances not standard errors.
+#     constraints
+#         If list nonempty, enforces constraints on optimization problem. See notes for list requirements.
+#     A_const
+#         Boolean variable that optimizes over possible A if False, holds constant if True.
+#     N_const
+#         Boolean variable that optimizes over possible N if False, holds constant if True.
+#     M1_const
+#         Boolean variable that optimizes over possible M1 if False, holds constant if True.
+#     OR
+#         Boolean variable that performs GL convex optimization for OR if True, RR if False.
 
-    Returns
-    -------
-    np.array
-        Covariance matrix to then be used in GLS to create estimates
+#     Returns
+#     -------
+#     np.array
+#         Covariance matrix to then be used in GLS to create estimates
 
-    Notes
-    -------
-    Note that every "constraints" argument must have elements defined as lambda functions of the form:
-            lambda A,N,M1: cp.sum(A) == 115
-    (as an example). This is because A, N, M1 are not being defined until the function is called.
+#     Notes
+#     -------
+#     Note that every "constraints" argument must have elements defined as lambda functions of the form:
+#             lambda A,N,M1: cp.sum(A) == 115
+#     (as an example). This is because A, N, M1 are not being defined until the function is called.
 
-    """
-    Ax, Bx, a0x, b0x = convex_gl(
-        L, N, M1, constraints, A_const, N_const, M1_const, OR
-    )
-    return _create_covariance_matrix(Ax, Bx, a0x, b0x, v)
-
-
-def covariance_matrix_gl(
-    L: NDArray,
-    A0: NDArray,
-    N: NDArray,
-    M1: float_or_int,
-    v: NDArray,
-    OR: bool = True,
-    i_ret: bool = False,
-) -> NDArray:
-    r"""Function that will take in necessary parameters to run gl method and returns the desired covariance matrix, calling
-    _create_covariance_matrix function.
-
-    Parameters
-    ----------
-    L
-        The nx1 vector of LOG ORs or RRs for each exposure level.
-    A0
-        The nx1 vector of reported cases or null expected value cases. Serves as initial guess for rootfinding procedure.
-    N
-        The (n+1)x1 vector of subjects for each exposure level.
-    M1
-        The integer of total number of cases in the study.
-    v
-        The nx1 vector of reported variances. Must be variances not standard errors.
-    OR
-        Boolean variable that performs GL convex optimization for OR if True, RR if False.
-    i_ret
-        Boolean variable that returns number of iterations to converge if True, doesn't return if False.
-
-    Returns
-    -------
-    np.array
-        Covariance matrix to then be used in GLS to create estimates
-
-    """
-    Ax, Bx, a0x, b0x = gl(L, A0, N, M1, OR, i_ret)
-    return _create_covariance_matrix(Ax, Bx, a0x, b0x, v)
+#     """
+#     Ax, Bx, a0x, b0x = convex_gl(
+#         L, N, M1, constraints, A_const, N_const, M1_const, OR
+#     )
+#     return _create_covariance_matrix(Ax, Bx, a0x, b0x, v)
 
 
-def covariance_matrix_hamling(
-    L: NDArray,
-    p0: np.float64,
-    z0: np.float64,
-    v: NDArray,
-    x_feas: NDArray | None = None,
-    OR: bool = True,
-) -> NDArray:
-    r"""Function that will take in necessary parameters to run hamling method and returns the desired covariance matrix, calling
-    _create_covariance_matrix function.
+# def covariance_matrix_gl(
+#     L: NDArray,
+#     A0: NDArray,
+#     N: NDArray,
+#     M1: float_or_int,
+#     v: NDArray,
+#     OR: bool = True,
+#     i_ret: bool = False,
+# ) -> NDArray:
+#     r"""Function that will take in necessary parameters to run gl method and returns the desired covariance matrix, calling
+#     _create_covariance_matrix function.
 
-    Parameters
-    ----------
-    L
-        The nx1 vector of LOG ORs or RRs for each exposure level.
-    p0
-        The float of reference non-cases to total non-cases (for every exposure, including reference).
-    z0
-        The float of total non-cases to total cases (for every exposure, including reference).
-    x_feas
-        The 2x1 vector that serves as the intial guess in Hamling optimization procedure.
-    v
-        The nx1 vector of reported variances. Must be variances, not standard errors.
-    OR
-        Boolean variable that performs GL convex optimization for OR if True, RR if False.
+#     Parameters
+#     ----------
+#     L
+#         The nx1 vector of LOG ORs or RRs for each exposure level.
+#     A0
+#         The nx1 vector of reported cases or null expected value cases. Serves as initial guess for rootfinding procedure.
+#     N
+#         The (n+1)x1 vector of subjects for each exposure level.
+#     M1
+#         The integer of total number of cases in the study.
+#     v
+#         The nx1 vector of reported variances. Must be variances not standard errors.
+#     OR
+#         Boolean variable that performs GL convex optimization for OR if True, RR if False.
+#     i_ret
+#         Boolean variable that returns number of iterations to converge if True, doesn't return if False.
 
-    Returns
-    -------
-    np.array
-        Covariance matrix to then be used in GLS to create estimates
+#     Returns
+#     -------
+#     np.array
+#         Covariance matrix to then be used in GLS to create estimates
+
+#     """
+#     Ax, Bx, a0x, b0x = gl(L, A0, N, M1, OR, i_ret)
+#     return _create_covariance_matrix(Ax, Bx, a0x, b0x, v)
 
 
-    """
-    if x_feas is None:
-        x_feas = np.array([10 / np.min(v), 10 / np.min(v)])
+# def covariance_matrix_hamling(
+#     L: NDArray,
+#     p0: np.float64,
+#     z0: np.float64,
+#     v: NDArray,
+#     x_feas: NDArray | None = None,
+#     OR: bool = True,
+# ) -> NDArray:
+#     r"""Function that will take in necessary parameters to run hamling method and returns the desired covariance matrix, calling
+#     _create_covariance_matrix function.
 
-    Ax, Bx, a0x, b0x = hamling(L, p0, z0, v, x_feas, OR)
-    return _create_covariance_matrix(Ax, Bx, a0x, b0x, v)
+#     Parameters
+#     ----------
+#     L
+#         The nx1 vector of LOG ORs or RRs for each exposure level.
+#     p0
+#         The float of reference non-cases to total non-cases (for every exposure, including reference).
+#     z0
+#         The float of total non-cases to total cases (for every exposure, including reference).
+#     x_feas
+#         The 2x1 vector that serves as the intial guess in Hamling optimization procedure.
+#     v
+#         The nx1 vector of reported variances. Must be variances, not standard errors.
+#     OR
+#         Boolean variable that performs GL convex optimization for OR if True, RR if False.
+
+#     Returns
+#     -------
+#     np.array
+#         Covariance matrix to then be used in GLS to create estimates
+
+
+#     """
+#     if x_feas is None:
+#         x_feas = np.array([10 / np.min(v), 10 / np.min(v)])
+
+#     Ax, Bx, a0x, b0x = hamling(L, p0, z0, v, x_feas, OR)
+#     return _create_covariance_matrix(Ax, Bx, a0x, b0x, v)
 
 
 def gls_reg(

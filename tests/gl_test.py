@@ -39,16 +39,16 @@ def data_RR():
 
 
 def test_sum_cases_OR(data_OR):
-    A, _, a0, _ = gl.convex_gl(*(tuple(data_OR.values())))
-    assert (np.sum(A) + a0) == data_OR[
-        "M"
-    ], "Sum of pseudo-cases does not match actual sum of cases."
+    dc = gl.convex_gl(*(tuple(data_OR.values())))
+    assert (
+        dc.A_sum() == data_OR["M"]
+    ), "Sum of pseudo-cases does not match actual sum of cases."
 
 
 def test_subjects_OR(data_OR):
-    A, B, a0, b0 = gl.convex_gl(*(tuple(data_OR.values())))
-    A_n = np.hstack((a0, A))
-    B_n = np.hstack((b0, B))
+    dc = gl.convex_gl(*(tuple(data_OR.values())))
+    A_n = dc.data[:, 0]
+    B_n = dc.data[:, 1]
     assert_array_equal(
         (A_n + B_n),
         data_OR["N"],
@@ -57,8 +57,8 @@ def test_subjects_OR(data_OR):
 
 
 def test_match_ratios_OR(data_OR):
-    A, B, a0, b0 = gl.convex_gl(*(tuple(data_OR.values())))
-    L = np.log((A * b0) / (B * a0))
+    dc = gl.convex_gl(*(tuple(data_OR.values())))
+    L = dc.log_ratio()
     assert_approx_equal(
         np.sum(data_OR["log odds-L"]),
         np.sum(L),
@@ -68,16 +68,16 @@ def test_match_ratios_OR(data_OR):
 
 
 def test_sum_cases_RR(data_RR):
-    A, _, a0, _ = gl.convex_gl(*(tuple(data_RR.values())))
-    assert (np.sum(A) + a0) == data_RR[
-        "M"
-    ], "Sum of pseudo-cases does not match actual sum of cases."
+    dc = gl.convex_gl(*(tuple(data_RR.values())))
+    assert (
+        dc.A_sum() == data_RR["M"]
+    ), "Sum of pseudo-cases does not match actual sum of cases."
 
 
 def test_subjects_RR(data_RR):
-    A, B, a0, b0 = gl.convex_gl(*(tuple(data_RR.values())))
-    A_n = np.hstack((a0, A))
-    B_n = np.hstack((b0, B))
+    dc = gl.convex_gl(*(tuple(data_RR.values())))
+    A_n = dc.data[:, 0]
+    B_n = dc.data[:, 1]
     assert_array_equal(
         (A_n + B_n),
         data_RR["N"],
@@ -86,8 +86,8 @@ def test_subjects_RR(data_RR):
 
 
 def test_match_ratios_RR(data_RR):
-    A, B, a0, b0 = gl.convex_gl(*(tuple(data_RR.values())))
-    L = np.log((A * b0) / (B * a0))
+    dc = gl.convex_gl(*(tuple(data_RR.values())))
+    L = dc.log_ratio()
     assert_approx_equal(
         np.sum(data_RR["log relative risk-L"]),
         np.sum(L),

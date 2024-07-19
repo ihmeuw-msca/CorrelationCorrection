@@ -2,6 +2,8 @@ import numpy as np
 import scipy
 from numpy.typing import NDArray
 
+from .data_counts import Counts
+
 
 def hamling(
     L: NDArray,
@@ -10,7 +12,7 @@ def hamling(
     v: NDArray,
     x_feas: NDArray | None = None,
     OR: bool = True,
-) -> tuple[NDArray, NDArray, np.float64, np.float64]:
+) -> Counts:
     r"""Function that performs Hamling's method. Finds a0, b0 values to minimize the squared residual summed error:
             (p0-p1)^2/p0 + (z0-z1)^2/z0 .
     Uses equations defined directly in the Hamling paper. We introduce an initialization x_feas that always converges.
@@ -90,7 +92,9 @@ def hamling(
         B_fit = B_num / denom
 
     # Return a0, b0 in that order
-    return A_fit, B_fit, a0_fit, b0_fit
+
+    dc = Counts(A_fit, B_fit, a0_fit, b0_fit)
+    return dc
 
 
 # def ham_solved(b0,B,M1,Lx,v,a0,OR=True):

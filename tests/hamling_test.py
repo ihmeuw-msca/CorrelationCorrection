@@ -40,20 +40,20 @@ def data_RR():
 
 
 def test_positive_A_OR(data_OR):
-    A, _, a0, _ = ham.hamling(*(tuple(data_OR.values())))
-    A_n = np.hstack((a0, A))
+    dc = ham.hamling(*(tuple(data_OR.values())))
+    A_n = dc.data[:, 0]
     assert np.all(A_n > 0), "Not all the elements in A are greater than 0."
 
 
 def test_positive_B_OR(data_OR):
-    _, B, _, b0 = ham.hamling(*(tuple(data_OR.values())))
-    B_n = np.hstack((b0, B))
+    dc = ham.hamling(*(tuple(data_OR.values())))
+    B_n = dc.data[:, 1]
     assert np.all(B_n > 0), "Not all the elements in B are greater than 0."
 
 
 def test_match_p_OR(data_OR):
-    _, B, _, b0 = ham.hamling(*(tuple(data_OR.values())))
-    p = b0 / (b0 + np.sum(B))
+    dc = ham.hamling(*(tuple(data_OR.values())))
+    p = dc.b0 / (dc.B_sum())
     assert_approx_equal(
         data_OR["p"],
         p,
@@ -63,8 +63,8 @@ def test_match_p_OR(data_OR):
 
 
 def test_match_z_OR(data_OR):
-    A, B, a0, b0 = ham.hamling(*(tuple(data_OR.values())))
-    z = (np.sum(B) + b0) / (np.sum(A) + a0)
+    dc = ham.hamling(*(tuple(data_OR.values())))
+    z = (dc.B_sum()) / (dc.A_sum())
     assert_approx_equal(
         data_OR["z"],
         z,
@@ -74,8 +74,8 @@ def test_match_z_OR(data_OR):
 
 
 def test_match_OR(data_OR):
-    A, B, a0, b0 = ham.hamling(*(tuple(data_OR.values())))
-    L = np.log((A * b0) / (B * a0))
+    dc = ham.hamling(*(tuple(data_OR.values())))
+    L = dc.log_ratio()
     assert_approx_equal(
         np.sum(data_OR["log odds-L"]),
         np.sum(L),
@@ -85,20 +85,20 @@ def test_match_OR(data_OR):
 
 
 def test_positive_A_RR(data_RR):
-    A, _, a0, _ = ham.hamling(*(tuple(data_RR.values())))
-    A_n = np.hstack((a0, A))
+    dc = ham.hamling(*(tuple(data_RR.values())))
+    A_n = dc.data[:, 0]
     assert np.all(A_n > 0), "Not all the elements in A are greater than 0."
 
 
 def test_positive_B_RR(data_RR):
-    _, B, _, b0 = ham.hamling(*(tuple(data_RR.values())))
-    B_n = np.hstack((b0, B))
+    dc = ham.hamling(*(tuple(data_RR.values())))
+    B_n = dc.data[:, 1]
     assert np.all(B_n > 0), "Not all the elements in B are greater than 0."
 
 
 def test_match_p_RR(data_RR):
-    _, B, _, b0 = ham.hamling(*(tuple(data_RR.values())))
-    p = b0 / (b0 + np.sum(B))
+    dc = ham.hamling(*(tuple(data_RR.values())))
+    p = dc.b0 / (dc.B_sum())
     assert_approx_equal(
         data_RR["p"],
         p,
@@ -108,8 +108,8 @@ def test_match_p_RR(data_RR):
 
 
 def test_match_z_RR(data_RR):
-    A, B, a0, b0 = ham.hamling(*(tuple(data_RR.values())))
-    z = (np.sum(B) + b0) / (np.sum(A) + a0)
+    dc = ham.hamling(*(tuple(data_RR.values())))
+    z = (dc.B_sum()) / (dc.A_sum())
     assert_approx_equal(
         data_RR["z"],
         z,
@@ -119,8 +119,8 @@ def test_match_z_RR(data_RR):
 
 
 def test_match_RR(data_RR):
-    A, B, a0, b0 = ham.hamling(*(tuple(data_RR.values())))
-    L = np.log((A * b0) / (B * a0))
+    dc = ham.hamling(*(tuple(data_RR.values())))
+    L = dc.log_ratio()
     assert_approx_equal(
         np.sum(data_RR["log relative risk-L"]),
         np.sum(L),

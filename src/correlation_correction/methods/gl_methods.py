@@ -5,6 +5,8 @@ import numpy as np
 import scipy
 from numpy.typing import NDArray
 
+from .data_counts import Counts
+
 float_or_int = Union[np.float64, int]
 
 
@@ -17,7 +19,7 @@ def convex_gl(
     N_const: bool = False,
     M1_const: bool = False,
     OR: bool = True,
-) -> tuple[NDArray, NDArray, np.float64, np.float64]:
+) -> Counts:
     r"""Function that will solve the convex optimization problem
     G(A) = -L^\top A + (a_0(A)log(a_0(A)) - a_0(A)) + \sum_{i=1}^{n}(B_i(A)log(B_i(A)) - B_i(A)) +
             \sum_{i=1}^{n}(A_ilog(A_i) - A_i) + (b_0(A)log(b_0(A)) - b_0(A))
@@ -128,7 +130,9 @@ def convex_gl(
         B_cvx = N[1:]
         a0_cvx = M1 - np.sum(A_cvx)
         b0_cvx = N[0]
-    return A_cvx, B_cvx, a0_cvx, b0_cvx
+
+    dc = Counts(A_cvx, B_cvx, a0_cvx, b0_cvx)
+    return dc
 
 
 def gl(
@@ -213,4 +217,5 @@ def gl(
     if ~i_ret:
         return A, a0, B, b0, i
     else:
-        return A, B, a0, b0
+        dc = Counts(A, B, a0, b0)
+        return dc
